@@ -1,0 +1,22 @@
+{
+	"description": "Papertrail logging as plugin",
+	"documentation": "-",
+	"entrypoint": ["/usr/bin/docker-papertrail-log-driver"],
+	"interface": {
+		"types": ["docker.logdriver/1.0"],
+		"socket": "papertrail.sock"
+	},
+	"network": {
+		"type": "host"
+	},
+	"env": [
+		{
+			"name": "LOG_LEVEL",
+			"description": "Set log level to output for plugin logs",
+			"value": "info",
+			"settable": ["value"]
+		}
+	]
+}
+
+
