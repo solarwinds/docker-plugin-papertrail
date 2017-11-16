@@ -41,7 +41,6 @@ func newDriver() *driver {
 
 func (d *driver) StartLogging(file string, logCtx logger.Info) error {
 	logrus.Infof("Paper trail - Start logging")
-	logrus.Infof("Printing context: %#v", logCtx)
 
 	d.mu.Lock()
 	if _, exists := d.logs[file]; exists {
@@ -57,7 +56,6 @@ func (d *driver) StartLogging(file string, logCtx logger.Info) error {
 		return errors.Wrap(err, "error setting up logger dir")
 	}
 
-	// l, err := jsonfilelog.New(logCtx)
 	l, err := NewPaperTrailLogger(logCtx)
 	if err != nil {
 		return errors.Wrap(err, "error creating papertrail logger")
@@ -90,34 +88,6 @@ func (d *driver) StopLogging(file string) error {
 	d.mu.Unlock()
 	return nil
 }
-
-// func consumeLog(lf *logPair) {
-// 	dec := protoio.NewUint32DelimitedReader(lf.stream, binary.BigEndian, 1e6)
-// 	defer dec.Close()
-// 	var buf logdriver.LogEntry
-// 	for {
-// 		if err := dec.ReadMsg(&buf); err != nil {
-// 			if err == io.EOF {
-// 				logrus.WithField("id", lf.info.ContainerID).WithError(err).Debug("shutting down log logger")
-// 				lf.stream.Close()
-// 				return
-// 			}
-// 			dec = protoio.NewUint32DelimitedReader(lf.stream, binary.BigEndian, 1e6)
-// 		}
-// 		var msg logger.Message
-// 		msg.Line = buf.Line
-// 		msg.Source = buf.Source
-// 		msg.Partial = buf.Partial
-// 		msg.Timestamp = time.Unix(0, buf.TimeNano)
-
-// 		if err := lf.l.Log(&msg); err != nil {
-// 			logrus.WithField("id", lf.info.ContainerID).WithError(err).WithField("message", msg).Error("error writing log message")
-// 			continue
-// 		}
-
-// 		buf.Reset()
-// 	}
-// }
 
 func consumeLog(lf *logPair) {
 	dec := protoio.NewUint32DelimitedReader(lf.stream, binary.BigEndian, 1e6)

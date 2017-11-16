@@ -46,8 +46,6 @@ const (
 	PAPERTRAIL_MAX_LIMIT        = 10000
 )
 
-// ReadLogs implements the logger's LogReader interface for the logs
-// created by this driver.
 func (p *PaperTrailLogger) ReadLogs(config logger.ReadConfig) *logger.LogWatcher {
 	logWatcher := logger.NewLogWatcher()
 
@@ -74,7 +72,6 @@ func (p *PaperTrailLogger) readLogs(watcher *logger.LogWatcher, config logger.Re
 	minID := ""
 	maxID := ""
 	reached_end := false
-	//reached_beginning := false
 
 	hostname, err := os.Hostname()
 	if err != nil {
@@ -85,6 +82,7 @@ func (p *PaperTrailLogger) readLogs(watcher *logger.LogWatcher, config logger.Re
 	}
 
 	tailTrack := config.Tail
+	var tailDone bool
 
 	if tailTrack > PAPERTRAIL_MAX_LIMIT {
 		e := errors.Wrap(err, fmt.Sprintf("Tail count cannot be greater than %d", PAPERTRAIL_MAX_LIMIT))
@@ -92,6 +90,8 @@ func (p *PaperTrailLogger) readLogs(watcher *logger.LogWatcher, config logger.Re
 		watcher.Err <- e
 		return
 	}
+
+	log.Debugf("Tail val: %d", tailTrack)
 
 	for maxID == "" || (reached_end == false && minID != maxID) || config.Follow {
 
@@ -108,17 +108,22 @@ func (p *PaperTrailLogger) readLogs(watcher *logger.LogWatcher, config logger.Re
 		q.Add("q", fmt.Sprintf("program:%s", p.containerID))
 		q.Add("tail", "false")
 
+		log.Debugf("Max id: %s", maxID)
 		if maxID != "" {
 			q.Add("min_id", maxID)
 			q.Add("limit", LIMIT) // not limiting for the first run
 		} else {
-			if !config.Since.IsZero() {
-				q.Add("min_time", fmt.Sprintf("%d", config.Since.Unix()))
-			} else {
-				q.Add("min_time", fmt.Sprintf("%d", p.containerCreatedTime.Unix())) // which is the container created time
-			}
+			log.Debugf("Tail track count: %d", tailTrack)
 			if tailTrack > 0 {
 				q.Add("limit", strconv.Itoa(tailTrack))
+				//q.Set("tail", "true")
+				tailDone = true
+			} else {
+				if !config.Since.IsZero() {
+					q.Add("min_time", fmt.Sprintf("%d", config.Since.Unix()))
+				} else {
+					q.Add("min_time", fmt.Sprintf("%d", p.containerCreatedTime.Unix())) // which is the container created time
+				}
 			}
 		}
 
@@ -157,12 +162,11 @@ func (p *PaperTrailLogger) readLogs(watcher *logger.LogWatcher, config logger.Re
 			watcher.Err <- e
 			return
 		}
-		log.Infof("Parsed Value min id: %s, max id: %s, reached_beginning: %t, reached_end: %t",
+		log.Debugf("Parsed Value min id: %s, max id: %s, reached_beginning: %t, reached_end: %t",
 			pResp.MinID, pResp.MaxID, pResp.ReachedBeginning, pResp.ReachedEnd)
 
 		minID = pResp.MinID
 		maxID = pResp.MaxID
-		//reached_beginning = pResp.ReachedBeginning
 		reached_end = pResp.ReachedEnd
 
 		for _, event := range pResp.Events {
@@ -172,6 +176,11 @@ func (p *PaperTrailLogger) readLogs(watcher *logger.LogWatcher, config logger.Re
 			msg.Source = "stdout"
 			watcher.Msg <- msg
 		}
+
+		if tailDone && !config.Follow {
+			break
+		}
+
 		time.Sleep(time.Millisecond * 500)
 	}
 }
