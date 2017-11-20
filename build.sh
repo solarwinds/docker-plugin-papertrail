@@ -10,10 +10,10 @@ docker volume prune -f
 sudo systemctl restart docker.service
 
 echo "Disabling the plugin if it exists"
-docker plugin disable papertrail
+docker plugin disable solarwinds/papertrail-plugin
 
 echo "Removing the plugin if it exists"
-docker plugin rm papertrail
+docker plugin rm solarwinds/papertrail-plugin
 
 
 #######################
@@ -59,14 +59,14 @@ echo "Removing the tar file"
 rm -f rootfs.tar
 
 echo "Setting the plugin up"
-docker plugin create papertrail papertrail/
+docker plugin create solarwinds/papertrail-plugin papertrail/
 
 echo "Enabling the plugin"
-docker plugin enable papertrail
+docker plugin enable solarwinds/papertrail-plugin
 
 #sudo systemctl restart docker.service
 
 echo "All done. Please proceed to use the log plugin."
 
 # for logs: journalctl -u docker.service -f
-# test container: docker run --rm --log-driver papertrail --log-opt papertrail-url=logs6.papertrailapp.com:22782 --log-opt papertrail-token=3usY2t96ZRtACypjcC2z ubuntu bash -c 'while true; do date +%s%N | sha256sum | base64 | head -c 32 ; echo " - Hello world"; sleep 10; done'
+# test container: docker run --rm --log-driver solarwinds/papertrail-plugin --log-opt papertrail-url=logs6.papertrailapp.com:22782 --log-opt papertrail-token=3usY2t96ZRtACypjcC2z ubuntu bash -c 'while true; do date +%s%N | sha256sum | base64 | head -c 32 ; echo " - Hello world"; sleep 10; done'
