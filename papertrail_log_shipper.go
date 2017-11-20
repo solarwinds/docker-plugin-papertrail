@@ -118,15 +118,13 @@ func (p *PaperTrailLogger) Log(msg *logger.Message) error {
 }
 func (p *PaperTrailLogger) sendLogs(data []byte) error {
 	var err error
-	if p.writer == nil {
-		p.writer, err = syslog.Dial("udp", p.paperTrailURL, syslog.LOG_EMERG|syslog.LOG_KERN, p.containerID)
-		if err != nil {
-			e := errors.Wrap(err, "failed to dial syslog")
-			log.Error(e)
-			return e
-		}
+	writer, err := syslog.Dial("udp", p.paperTrailURL, syslog.LOG_EMERG|syslog.LOG_KERN, p.containerID)
+	if err != nil {
+		e := errors.Wrap(err, "failed to dial syslog")
+		log.Error(e)
+		return e
 	}
-	err = p.writer.Info(string(data))
+	err = writer.Info(string(data))
 	if err != nil {
 		e := errors.Wrap(err, "failed to send log msg to papertrail")
 		log.Error(e)
