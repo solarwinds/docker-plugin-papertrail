@@ -22,8 +22,7 @@ rm -f docker-papertrail-log-driver
 #go clean
 
 echo "Building executable"
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo --ldflags '-extldflags "-static"' -o output/docker-papertrail-log-driver
-
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a --ldflags '-extldflags "-static"' -o output/docker-papertrail-log-driver
 #######################
 
 
