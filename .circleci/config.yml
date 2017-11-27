@@ -9,4 +9,4 @@ jobs:
     working_directory: $HOME/go/src/github.com/solarwinds/docker-plugin-papertrail
     steps:
       - checkout
-      - run: cd $HOME/go/src/github.com/solarwinds/docker-plugin-papertrail && GOPATH=$HOME/go ./build.sh
+      - run: cd $HOME/go/src/github.com/solarwinds/docker-plugin-papertrail && chmod +x build.sh && GOPATH=$HOME/go ./build.sh
