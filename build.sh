@@ -30,13 +30,13 @@ echo "Removing the tar file"
 rm -f rootfs.tar
 
 echo "Setting the plugin up"
-docker plugin create solarwinds/papertrail-plugin papertrail/
+sudo docker plugin create solarwinds/papertrail-plugin papertrail/
 
 echo "Enabling the plugin"
 docker plugin enable solarwinds/papertrail-plugin
 
 echo "Logging in to Docker"
-docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+docker login -u $DOCKER_USER -p $DOCKER_PASS
 
 echo "Publishing plugin"
 docker plugin push solarwinds/papertrail-plugin
