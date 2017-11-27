@@ -1,3 +1,9 @@
+echo "Getting dependencies"
+go get -a -d ./...
+
+echo "Building executable"
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o output/docker-papertrail-log-driver
+
 mkdir -p papertrail/rootfs
 
 echo "Copying configs"

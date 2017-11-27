@@ -6,7 +6,8 @@ jobs:
         version: 1.9.2
       services:
         - docker
-    working_directory: /go/src/github.com/solarwinds/docker-plugin-papertrail
+    working_directory: $HOME/go/src/github.com/solarwinds/docker-plugin-papertrail
     steps:
       - checkout
+      - run: export GOPATH=$HOME/go
       - run: ./build.sh
