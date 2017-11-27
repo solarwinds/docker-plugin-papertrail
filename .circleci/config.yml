@@ -1,0 +1,12 @@
+version: 2
+jobs:
+  build:
+    machine:
+      go:
+        version: 1.9.2
+      services:
+        - docker
+    working_directory: /go/src/github.com/solarwinds/docker-plugin-papertrail
+    steps:
+      - checkout
+      - run: ./build.sh

@@ -1,0 +1,3 @@
+FROM alpine
+ADD docker-papertrail-log-driver /usr/bin/
+RUN chmod +x /usr/bin/docker-papertrail-log-driver

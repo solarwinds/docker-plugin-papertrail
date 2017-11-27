@@ -11,7 +11,7 @@ This is a docker plugin for paper trail. Once configured, it can send docker log
 ---------------------------------
 
  - This plugin adds little resilience. The data is persisted until it is sent to papertrail.
- - Logs can be read from papertrail using docker logs. It also support docker logs follow and tail options.
+ - Logs can be read from papertrail using docker logs. It also supports docker logs follow and tail options.
 
 **How to use it?**
 --------------
