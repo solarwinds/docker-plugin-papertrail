@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/solarwinds/docker-plugin-papertail.svg?style=svg)](https://circleci.com/gh/solarwinds/docker-plugin-papertail)
+[![CircleCI](https://circleci.com/gh/solarwinds/docker-plugin-papertail/tree/master.svg?style=svg&circle-token=3525100eff1bfced65f4c7ea77b81c14798a56a0)](https://circleci.com/gh/solarwinds/docker-plugin-papertail/tree/master)
 
 # docker-plugin-papertail
 
