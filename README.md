@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/solarwinds/docker-plugin-papertail.svg?style=svg)](https://circleci.com/gh/solarwinds/docker-plugin-papertail)
+
 # docker-plugin-papertail
 
 This is a docker plugin for papertrail (https://papertrailapp.com) for sending and reading logs.
