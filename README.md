@@ -2,17 +2,17 @@
 
 # docker-plugin-papertail
 
-This is a docker plugin for papertrail (https://papertrailapp.com) for sending and reading logs.
+This is a Docker plugin for [Papertrail](https://papertrailapp.com) for sending and reading logs.
 
 **What is it?**
 -----------
 
-This is a docker plugin for paper trail. Once configured, it can send docker logs to papertrail and enable reading logs through docker logs.
+Once configured, it will send your Docker logs to Papertrail, buffer logs in the event of network disconnect as well as enable reading of remote logs from Papertrail through `docker logs` CLI.
 
 **Why not the docker syslog driver?**
 ---------------------------------
 
- - This plugin adds little resilience. The data is persisted until it is sent to papertrail.
+ - This plugin adds little resilience. The data is persisted until it is sent to Papertrail.
  - Logs can be read from papertrail using docker logs. It also supports docker logs follow and tail options.
 
 **How to use it?**
