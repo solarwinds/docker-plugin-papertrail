@@ -1,13 +1,13 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
-
 	//syslog "github.com/RackSec/srslog"
 
 	"log/syslog"
@@ -53,6 +53,9 @@ func NewPaperTrailLogger(logCtx logger.Info) (*PaperTrailLogger, error) {
 		IdleConnTimeout:       90 * time.Second,
 		TLSHandshakeTimeout:   10 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
 	}
 
 	client := &http.Client{
