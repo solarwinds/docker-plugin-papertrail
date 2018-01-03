@@ -3,7 +3,7 @@
 
 # docker-plugin-papertail
 
-This is a Docker plugin for [Papertrail](https://papertrailapp.com) for sending and reading logs.
+This is a plugin for Docker to both send logs to and read logs from [Papertrail](https://papertrailapp.com)
 
 **What is it?**
 -----------
