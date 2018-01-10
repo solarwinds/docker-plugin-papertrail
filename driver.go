@@ -24,6 +24,8 @@ type driver struct {
 	logs   map[string]*logPair
 	idx    map[string]*logPair
 	logger logger.Logger
+
+	loopFactor bool
 }
 
 type logPair struct {
@@ -34,8 +36,9 @@ type logPair struct {
 
 func newDriver() *driver {
 	return &driver{
-		logs: make(map[string]*logPair),
-		idx:  make(map[string]*logPair),
+		logs:       make(map[string]*logPair),
+		idx:        make(map[string]*logPair),
+		loopFactor: true,
 	}
 }
 
@@ -56,7 +59,7 @@ func (d *driver) StartLogging(file string, logCtx logger.Info) error {
 		return errors.Wrap(err, "error setting up logger dir")
 	}
 
-	l, err := NewPaperTrailLogger(logCtx)
+	l, err := newPaperTrailLogger(logCtx)
 	if err != nil {
 		return errors.Wrap(err, "error creating papertrail logger")
 	}
@@ -73,15 +76,17 @@ func (d *driver) StartLogging(file string, logCtx logger.Info) error {
 	d.idx[logCtx.ContainerID] = lf
 	d.mu.Unlock()
 
-	go consumeLog(lf)
+	go d.consumeLog(lf)
 	return nil
 }
 
 func (d *driver) StopLogging(file string) error {
 	logrus.WithField("file", file).Debugf("Stop logging")
 	d.mu.Lock()
+	d.loopFactor = false
 	lf, ok := d.logs[file]
 	if ok {
+		lf.l.Close()
 		lf.stream.Close()
 		delete(d.logs, file)
 	}
@@ -89,11 +94,11 @@ func (d *driver) StopLogging(file string) error {
 	return nil
 }
 
-func consumeLog(lf *logPair) {
+func (d *driver) consumeLog(lf *logPair) {
 	dec := protoio.NewUint32DelimitedReader(lf.stream, binary.BigEndian, 1e6)
 	defer dec.Close()
 	var buf logdriver.LogEntry
-	for {
+	for d.loopFactor {
 		if err := dec.ReadMsg(&buf); err != nil {
 			if err == io.EOF {
 				logrus.WithField("id", lf.info.ContainerID).WithError(err).Debug("shutting down log logger")
@@ -139,7 +144,7 @@ func (d *driver) ReadLogs(info logger.Info, config logger.ReadConfig) (io.ReadCl
 		defer watcher.Close()
 
 		var buf logdriver.LogEntry
-		for {
+		for d.loopFactor {
 			select {
 			case msg, ok := <-watcher.Msg:
 				if !ok {

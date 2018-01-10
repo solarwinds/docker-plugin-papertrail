@@ -46,14 +46,14 @@ const (
 	PAPERTRAIL_MAX_LIMIT        = 10000
 )
 
-func (p *PaperTrailLogger) ReadLogs(config logger.ReadConfig) *logger.LogWatcher {
+func (p *paperTrailLogger) ReadLogs(config logger.ReadConfig) *logger.LogWatcher {
 	logWatcher := logger.NewLogWatcher()
 
 	go p.prepWatcher(logWatcher, config)
 	return logWatcher
 }
 
-func (p *PaperTrailLogger) prepWatcher(watcher *logger.LogWatcher, config logger.ReadConfig) {
+func (p *paperTrailLogger) prepWatcher(watcher *logger.LogWatcher, config logger.ReadConfig) {
 	defer close(watcher.Msg)
 
 	p.mu.Lock()
@@ -67,7 +67,7 @@ func (p *PaperTrailLogger) prepWatcher(watcher *logger.LogWatcher, config logger
 	p.mu.Unlock()
 }
 
-func (p *PaperTrailLogger) readLogs(watcher *logger.LogWatcher, config logger.ReadConfig) {
+func (p *paperTrailLogger) readLogs(watcher *logger.LogWatcher, config logger.ReadConfig) {
 
 	minID := ""
 	maxID := ""

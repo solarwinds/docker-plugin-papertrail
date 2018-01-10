@@ -1,3 +1,5 @@
 .vscode/
 
 papertrail/
+
+output/docker-papertrail-log-driver

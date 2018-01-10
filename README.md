@@ -47,9 +47,17 @@ The plugin needs to use the host network for sending logs to paper trail. Please
 
 Once installed, we need to configure docker to use the plugin.
 
-If you want to configure a specific container to use the driver, you can use the "--log-driver" and "--log-opt" options to docker run like this example below:
+Configuration options available are:
+- papertrail-url: This is the papertrail url to send the logs to
+- papertrail-token: The papertrail token used to fetch the logs
+- papertrail-log-retention: Max duration for which the logs will be persisted in the event of the service not being reachable. Examples of accepted values: 24h, 10m, 20s, etc. The default value is 24h. 
+- papertrail-max-diskusage: Max disk usage in percentage for persisting logs beyond which older logs will be discarded. For example: 5, 10, 12, etc. The default value is 5.
 
-    docker run --rm --log-driver solarwinds/papertrail-plugin --log-opt papertrail-url=logsX.papertrailapp.com:XXXXX --log-opt papertrail-token=adbdyxendkkxk ubuntu bash -c 'while true; do date +%s%N | sha256sum | base64 | head -c 32 ; echo " - Hello world"; sleep 10; done'
+
+If you want to configure a specific container to use the driver, you can use the "--log-driver" and "--log-opt" options to `docker run` like this example below:
+
+    docker run --rm --log-driver solarwinds/papertrail-plugin --log-opt papertrail-url=logsX.papertrailapp.com:XXXXX \
+        --log-opt papertrail-token=adbdyxendkkxk ubuntu bash -c 'while true; do date +%s%N | sha256sum | base64 | head -c 32 ; echo " - Hello world"; sleep 10; done'
 
 
 ----------
@@ -61,7 +69,9 @@ To configure the Docker daemon to default to this logging driver, set the value 
       "log-driver": "solarwinds/papertrail-plugin",
       "log-opts": {
         "papertrail-url": "logsX.papertrailapp.com:XXXXX",
-        "papertrail-token": "adbdyxendkkxk"
+        "papertrail-token": "adbdyxendkkxk",
+        "papertrail-log-retention": "4h",
+        "papertrail-max-diskusage": "10"
       }
     }
 
