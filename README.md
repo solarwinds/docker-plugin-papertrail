@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/solarwinds/docker-plugin-papertail/tree/master.svg?style=svg&circle-token=3525100eff1bfced65f4c7ea77b81c14798a56a0)](https://circleci.com/gh/solarwinds/docker-plugin-papertail/tree/master)
+([![CircleCI](https://circleci.com/gh/solarwinds/docker-plugin-papertrail/tree/master.svg?style=svg&circle-token=3525100eff1bfced65f4c7ea77b81c14798a56a0)](https://circleci.com/gh/solarwinds/docker-plugin-papertrail/tree/master))
 <p align="center"><strong>NOTE</strong>: this is considered <strong>EXPERIMENTAL</strong> and is not yet recommended for production systems.</p>
 
 # docker-plugin-papertail
@@ -109,5 +109,5 @@ Start tailing from the last N lines:
 ----------
 
 # Questions/Comments?
-Please [open an issue](https://github.com/solarwinds/prometheus2appoptics/issues/new), we'd love to hear from you. As a SolarWinds Innovation Project, this adapter is supported in a best-effort fashion.
+Please [open an issue](https://github.com/solarwinds/docker-plugin-papertrail/issues/new), we'd love to hear from you. As a SolarWinds Innovation Project, this plugin is supported in a best-effort fashion.
 
