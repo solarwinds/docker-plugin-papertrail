@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 echo "Getting dependencies"
 go get -a -d ./...
 
@@ -23,6 +24,8 @@ docker export "$id" > rootfs.tar
 docker rm -vf "$id"
 docker rmi rootfsimage
 
+[[ -z "${CIRCLE_TAG}" ]] && tag="${CIRCLE_SHA1}" || tag="${CIRCLE_TAG}"
+
 echo "Extracting the tar'd root fs"
 sudo tar -x --owner root --group root --no-same-owner -C papertrail/rootfs < rootfs.tar
 
@@ -30,13 +33,16 @@ echo "Removing the tar file"
 rm -f rootfs.tar
 
 echo "Setting the plugin up"
-sudo docker plugin create solarwinds/papertrail-plugin papertrail/
+sudo docker plugin create solarwinds/papertrail-plugin:$tag papertrail/
+sudo docker plugin create solarwinds/papertrail-plugin:latest papertrail/
 
 echo "Enabling the plugin"
-docker plugin enable solarwinds/papertrail-plugin
+docker plugin enable solarwinds/papertrail-plugin:$tag
+docker plugin enable solarwinds/papertrail-plugin:latest
 
 echo "Logging in to Docker"
 docker login -u $DOCKER_USER -p $DOCKER_PASS
 
 echo "Publishing plugin"
-docker plugin push solarwinds/papertrail-plugin
+docker plugin push solarwinds/papertrail-plugin:$tag
+docker plugin push solarwinds/papertrail-plugin:latest
