@@ -24,7 +24,7 @@ docker export "$id" > rootfs.tar
 docker rm -vf "$id"
 docker rmi rootfsimage
 
-[[ -z "${CIRCLE_TAG}" ]] && tag="${CIRCLE_SHA1}" || tag="${CIRCLE_TAG}"
+[[ -z "${CIRCLE_TAG}" ]] && tag="$(echo $CIRCLE_SHA1 | cut -c -7)" || tag="${CIRCLE_TAG}"
 
 echo "Extracting the tar'd root fs"
 sudo tar -x --owner root --group root --no-same-owner -C papertrail/rootfs < rootfs.tar
