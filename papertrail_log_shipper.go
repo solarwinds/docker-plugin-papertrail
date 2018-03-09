@@ -14,7 +14,7 @@ import (
 	"syscall"
 	"time"
 
-	"log/syslog"
+	syslog "github.com/RackSec/srslog"
 
 	"github.com/dgraph-io/badger"
 	"github.com/docker/docker/daemon/logger"
@@ -37,8 +37,9 @@ const (
 )
 
 type paperTrailLogger struct {
-	paperTrailURL string
-	token         string
+	paperTrailProto string
+	paperTrailURL   string
+	token           string
 
 	retentionPeriod time.Duration
 
@@ -83,6 +84,13 @@ func newPaperTrailLogger(logCtx logger.Info) (*paperTrailLogger, error) {
 
 	client := &http.Client{
 		Transport: transport,
+	}
+
+	paperTrailProto := logCtx.Config["papertrail-proto"]
+	if strings.TrimSpace(paperTrailProto) == "" {
+		// Default to UDP for backwards compatability
+		paperTrailProto = "udp"
+		log.Info("papertrail-proto not set. Defaulting to udp.")
 	}
 
 	paperTrailURL := logCtx.Config["papertrail-url"]
@@ -131,6 +139,7 @@ func newPaperTrailLogger(logCtx logger.Info) (*paperTrailLogger, error) {
 	log.Infof("Creating a new paper trail logger for url: %s", paperTrailURL)
 
 	p := &paperTrailLogger{
+		paperTrailProto: paperTrailProto,
 		paperTrailURL:   paperTrailURL,
 		token:           paperTrailToken,
 		retentionPeriod: time.Duration(retention) * time.Hour,
@@ -176,7 +185,7 @@ func (p *paperTrailLogger) Log(msg *logger.Message) error {
 }
 func (p *paperTrailLogger) sendLogs(data []byte) error {
 	var err error
-	writer, err := syslog.Dial("udp", p.paperTrailURL, syslog.LOG_EMERG|syslog.LOG_KERN, p.containerID)
+	writer, err := syslog.Dial(p.paperTrailProto, p.paperTrailURL, syslog.LOG_EMERG|syslog.LOG_KERN, p.containerID)
 	if err != nil {
 		e := errors.Wrap(err, "failed to dial syslog")
 		log.Error(e)
