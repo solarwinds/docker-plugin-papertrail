@@ -29,9 +29,10 @@ type driver struct {
 }
 
 type logPair struct {
-	l      logger.Logger
-	stream io.ReadCloser
-	info   logger.Info
+	logShipper logger.Logger
+	logReader  logger.LogReader
+	stream     io.ReadCloser
+	info       logger.Info
 }
 
 func newDriver() *driver {
@@ -59,9 +60,14 @@ func (d *driver) StartLogging(file string, logCtx logger.Info) error {
 		return errors.Wrap(err, "error setting up logger dir")
 	}
 
-	l, err := newPaperTrailLogger(logCtx)
+	l, err := newPaperTrailLogShipper(logCtx)
 	if err != nil {
-		return errors.Wrap(err, "error creating papertrail logger")
+		return errors.Wrap(err, "error creating papertrail log shipper")
+	}
+
+	r, err := newPaperTrailLogReader(logCtx)
+	if err != nil {
+		return errors.Wrap(err, "error creating papertrail log reader")
 	}
 
 	logrus.WithField("id", logCtx.ContainerID).WithField("file", file).WithField("logpath", logCtx.LogPath).Debugf("Start logging")
@@ -71,7 +77,12 @@ func (d *driver) StartLogging(file string, logCtx logger.Info) error {
 	}
 
 	d.mu.Lock()
-	lf := &logPair{l, f, logCtx}
+	lf := &logPair{
+		logShipper: l,
+		logReader:  r,
+		stream:     f,
+		info:       logCtx,
+	}
 	d.logs[file] = lf
 	d.idx[logCtx.ContainerID] = lf
 	d.mu.Unlock()
@@ -86,7 +97,7 @@ func (d *driver) StopLogging(file string) error {
 	d.loopFactor = false
 	lf, ok := d.logs[file]
 	if ok {
-		lf.l.Close()
+		lf.logShipper.Close()
 		lf.stream.Close()
 		delete(d.logs, file)
 	}
@@ -113,7 +124,7 @@ func (d *driver) consumeLog(lf *logPair) {
 		msg.Partial = buf.Partial
 		msg.Timestamp = time.Unix(0, buf.TimeNano)
 
-		if err := lf.l.Log(&msg); err != nil {
+		if err := lf.logShipper.Log(&msg); err != nil {
 			logrus.WithField("id", lf.info.ContainerID).WithError(err).WithField("message", msg).Error("error writing log message")
 			continue
 		}
@@ -131,7 +142,7 @@ func (d *driver) ReadLogs(info logger.Info, config logger.ReadConfig) (io.ReadCl
 	}
 
 	r, w := io.Pipe()
-	lr, ok := lf.l.(logger.LogReader)
+	lr, ok := lf.logReader.(logger.LogReader)
 	if !ok {
 		return nil, fmt.Errorf("papertrail logger does not support reading")
 	}

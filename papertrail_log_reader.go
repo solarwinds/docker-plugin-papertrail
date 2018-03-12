@@ -1,12 +1,16 @@
 package main
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
+	"sync"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -14,6 +18,22 @@ import (
 	"github.com/docker/docker/daemon/logger"
 	"github.com/pkg/errors"
 )
+
+type paperTrailLogReader struct {
+	token string
+
+	hostname             string
+	containerID          string
+	containerName        string
+	containerImageID     string
+	containerImageName   string
+	containerCreatedTime time.Time
+
+	httpClient *http.Client
+
+	readers map[*logger.LogWatcher]struct{} // map for the active log followers
+	mu      sync.Mutex
+}
 
 type PaperTrailResponse struct {
 	MinID            string            `json:"min_id"`
@@ -46,14 +66,60 @@ const (
 	PAPERTRAIL_MAX_LIMIT        = 10000
 )
 
-func (p *paperTrailLogger) ReadLogs(config logger.ReadConfig) *logger.LogWatcher {
+func newPaperTrailLogReader(logCtx logger.Info) (*paperTrailLogReader, error) {
+	paperTrailToken := logCtx.Config["papertrail-token"]
+	if strings.TrimSpace(paperTrailToken) == "" {
+		err := errors.Errorf("Paper trail token cannot be empty.")
+		log.Error(err)
+		return nil, err
+	}
+	log.Info("Creating a new paper trail log reader")
+
+	transport := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	}
+
+	client := &http.Client{
+		Transport: transport,
+	}
+
+	p := &paperTrailLogReader{
+		token: paperTrailToken,
+
+		containerID:        logCtx.ContainerID,
+		containerName:      strings.Replace(logCtx.ContainerName, "/", "", 1),
+		containerImageID:   logCtx.ImageFullID(),
+		containerImageName: logCtx.ImageName(),
+
+		containerCreatedTime: logCtx.ContainerCreated,
+
+		readers: map[*logger.LogWatcher]struct{}{},
+
+		httpClient: client,
+	}
+
+	return p, nil
+}
+
+func (p *paperTrailLogReader) ReadLogs(config logger.ReadConfig) *logger.LogWatcher {
 	logWatcher := logger.NewLogWatcher()
 
 	go p.prepWatcher(logWatcher, config)
 	return logWatcher
 }
 
-func (p *paperTrailLogger) prepWatcher(watcher *logger.LogWatcher, config logger.ReadConfig) {
+func (p *paperTrailLogReader) prepWatcher(watcher *logger.LogWatcher, config logger.ReadConfig) {
 	defer close(watcher.Msg)
 
 	p.mu.Lock()
@@ -67,7 +133,7 @@ func (p *paperTrailLogger) prepWatcher(watcher *logger.LogWatcher, config logger
 	p.mu.Unlock()
 }
 
-func (p *paperTrailLogger) readLogs(watcher *logger.LogWatcher, config logger.ReadConfig) {
+func (p *paperTrailLogReader) readLogs(watcher *logger.LogWatcher, config logger.ReadConfig) {
 
 	minID := ""
 	maxID := ""
@@ -91,7 +157,7 @@ func (p *paperTrailLogger) readLogs(watcher *logger.LogWatcher, config logger.Re
 		return
 	}
 
-	log.Debugf("Tail val: %d", tailTrack)
+	log.Infof("Tail val: %d", tailTrack)
 
 	for maxID == "" || (reached_end == false && minID != maxID) || config.Follow {
 
@@ -105,15 +171,16 @@ func (p *paperTrailLogger) readLogs(watcher *logger.LogWatcher, config logger.Re
 
 		q := req.URL.Query()
 		q.Add("system_id", hostname)
+		//q.Add("q", fmt.Sprintf("program:"+TAG_FORMAT, p.containerName, p.containerID, p.containerImageName, p.containerImageID))
 		q.Add("q", fmt.Sprintf("program:%s", p.containerID))
 		q.Add("tail", "false")
 
-		log.Debugf("Max id: %s", maxID)
+		log.Infof("Max id: %s", maxID)
 		if maxID != "" {
 			q.Add("min_id", maxID)
 			q.Add("limit", LIMIT) // not limiting for the first run
 		} else {
-			log.Debugf("Tail track count: %d", tailTrack)
+			log.Infof("Tail track count: %d", tailTrack)
 			if tailTrack > 0 {
 				q.Add("limit", strconv.Itoa(tailTrack))
 				//q.Set("tail", "true")
@@ -134,7 +201,7 @@ func (p *paperTrailLogger) readLogs(watcher *logger.LogWatcher, config logger.Re
 		req.URL.RawQuery = q.Encode()
 
 		req.Header.Set(PAPERTRAIL_TOKEN_HEADERNAME, p.token)
-
+		log.Infof("Computed url: %s", req.URL.String())
 		resp, err := p.httpClient.Do(req)
 		if err != nil {
 			e := errors.Wrap(err, "Unable to call papertrail")
@@ -162,8 +229,9 @@ func (p *paperTrailLogger) readLogs(watcher *logger.LogWatcher, config logger.Re
 			watcher.Err <- e
 			return
 		}
-		log.Debugf("Parsed Value min id: %s, max id: %s, reached_beginning: %t, reached_end: %t",
+		log.Infof("Parsed Value min id: %s, max id: %s, reached_beginning: %t, reached_end: %t",
 			pResp.MinID, pResp.MaxID, pResp.ReachedBeginning, pResp.ReachedEnd)
+		log.Infof("Events: %v", pResp.Events)
 
 		minID = pResp.MinID
 		maxID = pResp.MaxID

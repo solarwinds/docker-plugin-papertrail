@@ -7,7 +7,7 @@ docker rm `docker ps -qa`
 docker image prune -f
 docker volume prune -f
 
-sudo systemctl restart docker.service
+#sudo systemctl restart docker.service
 
 echo "Disabling the plugin if it exists"
 docker plugin disable solarwinds/papertrail-plugin
