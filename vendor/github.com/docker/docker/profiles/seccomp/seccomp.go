@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/docker/docker/api/types"
+	"github.com/opencontainers/runtime-spec/specs-go"
 	libseccomp "github.com/seccomp/libseccomp-golang"
 )
 

@@ -16,10 +16,9 @@
 package sdjournal
 
 import (
+	"github.com/coreos/pkg/dlopen"
 	"sync"
 	"unsafe"
-
-	"github.com/coreos/pkg/dlopen"
 )
 
 var (

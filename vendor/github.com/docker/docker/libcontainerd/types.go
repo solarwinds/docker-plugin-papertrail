@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/containerd/containerd"
-	specs "github.com/opencontainers/runtime-spec/specs-go"
+	"github.com/opencontainers/runtime-spec/specs-go"
 )
 
 // EventType represents a possible event from libcontainerd

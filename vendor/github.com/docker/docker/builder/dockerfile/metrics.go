@@ -1,5 +1,9 @@
 package dockerfile
 
+import (
+	"github.com/docker/go-metrics"
+)
+
 var (
 	buildsTriggered metrics.Counter
 	buildsFailed    metrics.LabeledCounter

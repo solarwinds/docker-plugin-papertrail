@@ -1,9 +1,9 @@
 package logrus_test
 
 import (
-	"os"
-
 	"github.com/sirupsen/logrus"
+	"gopkg.in/gemnasium/logrus-airbrake-hook.v2"
+	"os"
 )
 
 func Example_hook() {

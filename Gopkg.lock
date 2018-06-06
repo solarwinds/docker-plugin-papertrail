@@ -3,8 +3,17 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/AndreasBriese/bbloom"
+  packages = ["."]
+  revision = "28f7e881ca57bc00e028f9ede9f0d9104cfeef5e"
+
+[[projects]]
+  branch = "master"
   name = "github.com/Azure/go-ansiterm"
-  packages = [".","winterm"]
+  packages = [
+    ".",
+    "winterm"
+  ]
   revision = "d6e3b3328b783f23731bc4d058875b0371ff8109"
 
 [[projects]]
@@ -21,6 +30,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/RackSec/srslog"
+  packages = ["."]
+  revision = "1f7cff998e92763c026b26ab7c80a39e19acc368"
+
+[[projects]]
+  branch = "master"
   name = "github.com/containerd/fifo"
   packages = ["."]
   revision = "fbfb6a11ec671efbe94ad1c12c2e98773f19e1e6"
@@ -32,14 +47,63 @@
   version = "v15"
 
 [[projects]]
+  name = "github.com/dgraph-io/badger"
+  packages = [
+    ".",
+    "options",
+    "protos",
+    "skl",
+    "table",
+    "y"
+  ]
+  revision = "690400e629977977ecddfa8ab3a7f9285e1041a8"
+  version = "v1.5.1"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/dgryski/go-farm"
+  packages = ["."]
+  revision = "2de33835d10275975374b37b2dcfd22c9020a1f5"
+
+[[projects]]
   branch = "master"
   name = "github.com/docker/docker"
-  packages = ["api/types","api/types/backend","api/types/blkiodev","api/types/container","api/types/filters","api/types/mount","api/types/network","api/types/plugins/logdriver","api/types/registry","api/types/strslice","api/types/swarm","api/types/swarm/runtime","api/types/versions","daemon/logger","pkg/ioutils","pkg/jsonmessage","pkg/longpath","pkg/plugingetter","pkg/plugins","pkg/plugins/transport","pkg/progress","pkg/streamformatter","pkg/stringid","pkg/term","pkg/term/windows"]
+  packages = [
+    "api/types",
+    "api/types/backend",
+    "api/types/blkiodev",
+    "api/types/container",
+    "api/types/filters",
+    "api/types/mount",
+    "api/types/network",
+    "api/types/plugins/logdriver",
+    "api/types/registry",
+    "api/types/strslice",
+    "api/types/swarm",
+    "api/types/swarm/runtime",
+    "api/types/versions",
+    "daemon/logger",
+    "pkg/ioutils",
+    "pkg/jsonmessage",
+    "pkg/longpath",
+    "pkg/plugingetter",
+    "pkg/plugins",
+    "pkg/plugins/transport",
+    "pkg/progress",
+    "pkg/streamformatter",
+    "pkg/stringid",
+    "pkg/term",
+    "pkg/term/windows"
+  ]
   revision = "aea31ab242a1e5f489f1597a726267ed190a3095"
 
 [[projects]]
   name = "github.com/docker/go-connections"
-  packages = ["nat","sockets","tlsconfig"]
+  packages = [
+    "nat",
+    "sockets",
+    "tlsconfig"
+  ]
   revision = "3ede32e2033de7505e6500d6c868c2b9ed9f169d"
   version = "v0.3.0"
 
@@ -57,9 +121,18 @@
 
 [[projects]]
   name = "github.com/gogo/protobuf"
-  packages = ["io","proto"]
+  packages = [
+    "io",
+    "proto"
+  ]
   revision = "342cbe0a04158f6dcb03ca0079991a51a4248c02"
   version = "v0.5"
+
+[[projects]]
+  name = "github.com/golang/protobuf"
+  packages = ["proto"]
+  revision = "b4deda0973fb4c70b50d226b1af49f3da59f5265"
+  version = "v1.1.0"
 
 [[projects]]
   name = "github.com/opencontainers/go-digest"
@@ -69,7 +142,10 @@
 
 [[projects]]
   name = "github.com/opencontainers/image-spec"
-  packages = ["specs-go","specs-go/v1"]
+  packages = [
+    "specs-go",
+    "specs-go/v1"
+  ]
   revision = "d60099175f88c47cd379c4738d158884749ed235"
   version = "v1.0.1"
 
@@ -80,10 +156,22 @@
   version = "v0.8.0"
 
 [[projects]]
+  name = "github.com/satori/go.uuid"
+  packages = ["."]
+  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
+  version = "v1.2.0"
+
+[[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  revision = "f006c2ac4710855cf0f916dd6b77acf6b048dc6e"
-  version = "v1.0.3"
+  revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
+  version = "v1.0.5"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/solarwinds/papertrail-go"
+  packages = ["."]
+  revision = "a4cc14eda0c88c552ef65d4011eba1975c50ef84"
 
 [[projects]]
   branch = "master"
@@ -100,13 +188,21 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
-  packages = ["context","proxy"]
+  packages = [
+    "context",
+    "internal/timeseries",
+    "proxy",
+    "trace"
+  ]
   revision = "a337091b0525af65de94df2eb7e98bd9962dcbe2"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
-  packages = ["unix","windows"]
+  packages = [
+    "unix",
+    "windows"
+  ]
   revision = "665f6529cca930e27b831a0d1dafffbe1c172924"
 
 [[projects]]
@@ -118,6 +214,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "84dda3020263790a17091cfe1a83eb27d29f9054245dfa969a44396205f94802"
+  inputs-digest = "69aab4f275e42e2ce6c311eb108e9251c633392825f177731d1c272bd1b4abc7"
   solver-name = "gps-cdcl"
   solver-version = 1

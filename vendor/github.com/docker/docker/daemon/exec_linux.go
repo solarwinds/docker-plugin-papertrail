@@ -5,7 +5,7 @@ import (
 	"github.com/docker/docker/daemon/caps"
 	"github.com/docker/docker/daemon/exec"
 	"github.com/opencontainers/runc/libcontainer/apparmor"
-	specs "github.com/opencontainers/runtime-spec/specs-go"
+	"github.com/opencontainers/runtime-spec/specs-go"
 )
 
 func (daemon *Daemon) execSetPlatformOpt(c *container.Container, ec *exec.Config, p *specs.Process) error {

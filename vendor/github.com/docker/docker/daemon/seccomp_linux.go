@@ -7,7 +7,7 @@ import (
 
 	"github.com/docker/docker/container"
 	"github.com/docker/docker/profiles/seccomp"
-	specs "github.com/opencontainers/runtime-spec/specs-go"
+	"github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/sirupsen/logrus"
 )
 

@@ -1,9 +1,8 @@
 package logrus_test
 
 import (
-	"os"
-
 	"github.com/sirupsen/logrus"
+	"os"
 )
 
 func Example_basic() {

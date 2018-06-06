@@ -2,6 +2,8 @@
 
 package daemon
 
+import "github.com/opencontainers/selinux/go-selinux"
+
 func selinuxSetDisabled() {
 	selinux.SetDisabled()
 }

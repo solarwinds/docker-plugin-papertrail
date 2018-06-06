@@ -1,9 +1,8 @@
 package secrets
 
 import (
-	"net/http"
-
 	"github.com/docker/go-plugins-helpers/sdk"
+	"net/http"
 )
 
 const (
