@@ -29,10 +29,11 @@ type driver struct {
 }
 
 type logPair struct {
-	logShipper logger.Logger
-	logReader  logger.LogReader
-	stream     io.ReadCloser
-	info       logger.Info
+	logShipper    logger.Logger
+	logReader     logger.LogReader
+	stream        io.ReadCloser
+	info          logger.Info
+	keepConsuming bool
 }
 
 func newDriver() *driver {
@@ -78,10 +79,11 @@ func (d *driver) StartLogging(file string, logCtx logger.Info) error {
 
 	d.mu.Lock()
 	lf := &logPair{
-		logShipper: l,
-		logReader:  r,
-		stream:     f,
-		info:       logCtx,
+		logShipper:    l,
+		logReader:     r,
+		stream:        f,
+		info:          logCtx,
+		keepConsuming: true,
 	}
 	d.logs[file] = lf
 	d.idx[logCtx.ContainerID] = lf
@@ -94,9 +96,9 @@ func (d *driver) StartLogging(file string, logCtx logger.Info) error {
 func (d *driver) StopLogging(file string) error {
 	logrus.WithField("file", file).Debugf("Stop logging")
 	d.mu.Lock()
-	d.loopFactor = false
 	lf, ok := d.logs[file]
 	if ok {
+		lf.keepConsuming = false
 		lf.logShipper.Close()
 		lf.stream.Close()
 		delete(d.logs, file)
@@ -109,7 +111,7 @@ func (d *driver) consumeLog(lf *logPair) {
 	dec := protoio.NewUint32DelimitedReader(lf.stream, binary.BigEndian, 1e6)
 	defer dec.Close()
 	var buf logdriver.LogEntry
-	for d.loopFactor {
+	for lf.keepConsuming {
 		if err := dec.ReadMsg(&buf); err != nil {
 			if err == io.EOF {
 				logrus.WithField("id", lf.info.ContainerID).WithError(err).Debug("shutting down log logger")
